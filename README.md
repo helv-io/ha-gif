@@ -36,6 +36,7 @@ Call the service `gif.create_gif` with the following parameters:
 - `images`: List of image file paths (at least 2)
 - `fps`: Frames per second (optional, default 10)
 - `output_path`: Path to save the GIF
+- `loop`: Whether the GIF should loop (optional, default true)
 
 Example in YAML:
 

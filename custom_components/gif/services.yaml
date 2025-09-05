@@ -18,3 +18,9 @@ create_gif:
       description: Path to save the GIF
       required: true
       example: "/config/gifs/output.gif"
+    loop:
+      name: Loop
+      description: Whether the GIF should loop
+      required: false
+      default: true
+      example: true

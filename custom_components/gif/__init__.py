@@ -16,6 +16,7 @@ async def async_setup(hass, config):
         images = call.data.get('images', [])
         fps = call.data.get('fps', 10)
         output_path = call.data.get('output_path')
+        loop = call.data.get('loop', True)
 
         if not images or len(images) < 2:
             _LOGGER.error("At least 2 images required")
@@ -26,8 +27,8 @@ async def async_setup(hass, config):
             return
 
         # Create GIF in thread to avoid blocking
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, create_gif_sync, images, fps, output_path)
+        event_loop = asyncio.get_event_loop()
+        await event_loop.run_in_executor(None, create_gif_sync, images, fps, output_path, loop)
 
         _LOGGER.info(f"GIF created at {output_path}")
 
@@ -40,7 +41,7 @@ async def async_setup_entry(hass, entry):
     # Since this integration only provides a service, no additional setup needed
     return True
 
-def create_gif_sync(images, fps, output_path):
+def create_gif_sync(images, fps, output_path, loop):
     frames = []
     first_size = None
     for img_path in images:
@@ -58,4 +59,5 @@ def create_gif_sync(images, fps, output_path):
             return
 
     if frames:
-        frames[0].save(output_path, save_all=True, append_images=frames[1:], duration=1000//fps, loop=0)
+        loop_value = 0 if loop else 1
+        frames[0].save(output_path, save_all=True, append_images=frames[1:], duration=1000//fps, loop=loop_value)
