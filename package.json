@@ -1,0 +1,13 @@
+{
+    "private": true,
+    "name": "ha-gif",
+    "version": "0.0.1",
+    "description": "A project for managing GIF integration.",
+    "author": "Helvio Pedreschi",
+    "license": "MIT",
+    "dependencies": {
+      "@release-it/bumper": "^7.0.5",
+      "release-it": "^19.0.4"
+    }
+  }
+  

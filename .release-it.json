@@ -1,0 +1,11 @@
+{
+    "plugins": {
+      "@release-it/bumper": {
+        "in": "custom_components/gif/manifest.json",
+        "out": "custom_components/gif/manifest.json"
+      }
+    },
+    "git": {
+      "commitMessage": "chore: release v${version}"
+    }
+  }
