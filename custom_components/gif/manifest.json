@@ -1,12 +1,16 @@
 {
   "domain": "gif",
   "name": "GIF Creator",
-  "codeowners": ["@Helvio88"],
+  "codeowners": [
+    "@Helvio88"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/helv-io/ha-gif",
   "integration_type": "service",
   "issue_tracker": "https://github.com/helv-io/ha-gif/issues",
-  "requirements": ["Pillow"],
+  "requirements": [
+    "Pillow"
+  ],
   "single_config_entry": true,
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
