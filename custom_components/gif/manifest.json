@@ -10,7 +10,7 @@
   "iot_class": "assumed_state",
   "issue_tracker": "https://github.com/helv-io/ha-gif/issues",
   "requirements": [
-    "Pillow==11.3.0"
+    "Pillow>=9.1.0,<12.0.0"
   ],
   "single_config_entry": true,
   "version": "0.1.0"
