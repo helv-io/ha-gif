@@ -57,8 +57,8 @@ create_gif:
           mode: box
     output_path:
       name: Output Path
-      description: Path to save the GIF
-      required: true
+      description: Optional path to save the GIF. Defaults to /config/www/gif/<camera_object_id>_<timestamp>.gif in camera mode, or /config/www/gif/images_<timestamp>.gif in images mode. Parent directories are created if needed.
+      required: false
       example: "/config/www/gif/output.gif"
       selector:
         text:

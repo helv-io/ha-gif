@@ -19,7 +19,7 @@ def test_manifest_public_contract() -> None:
     assert manifest["config_flow"] is True
     assert manifest["single_config_entry"] is True
     assert manifest["codeowners"] == ["@Helvio88"]
-    assert manifest["version"] == "0.3.0"
+    assert manifest["version"] == "0.3.1"
 
 
 def test_hacs_json_keeps_custom_repo_install() -> None:
@@ -52,6 +52,8 @@ def test_services_yaml_has_selectors_and_original_fields() -> None:
     assert "min: 1" in text
     assert "max: 60" in text
     assert "unit_of_measurement: seconds" in text
+    assert "required: true" not in text
+    assert "Defaults to /config/www/gif/" in text
 
 
 def test_translations_cover_config_services_and_exceptions() -> None:

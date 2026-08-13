@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+- Make `output_path` optional on `gif.create_gif`. Camera mode defaults to `/config/www/gif/<camera_object_id>_<YYYYMMDD_HHMMSS>.gif`; images mode defaults to `/config/www/gif/images_<YYYYMMDD_HHMMSS>.gif`.
+- Create `/config/www/gif/` when it is missing.
+- Return `output_path` and, when the file is under `www`, a `/local/...` `url` so automations can use `response_variable` without hardcoding a path.
+
 ## 0.3.0
 
 - Add optional camera mode to `gif.create_gif`: pass `camera` (a `camera.*` entity), `count` (default 10, range 2–60), and `interval` (default 0.5 s, range 0.1–10 s).

@@ -50,10 +50,12 @@ Create an animated GIF from **either** existing image files **or** snapshots of 
 | `count` | no | `10` | Number of snapshots in camera mode (`2`–`60`). Ignored when using `images`. |
 | `interval` | no | `0.5` | Seconds between snapshots in camera mode (`0.1`–`10`). Ignored when using `images`. Capture length is `(count − 1) × interval`. |
 | `fps` | no | `10` | Frames per second of the output GIF (`1`–`60`). |
-| `output_path` | yes | — | Path to save the GIF. Parent directories are created if needed. |
+| `output_path` | no | `/config/www/gif/<name>_<timestamp>.gif` | Path to save the GIF. Parent directories are created if needed. If omitted, camera mode writes `/config/www/gif/<camera_object_id>_<YYYYMMDD_HHMMSS>.gif` and images mode writes `/config/www/gif/images_<YYYYMMDD_HHMMSS>.gif`. |
 | `loop` | no | `true` | Whether the GIF should loop. |
 
-`images` and `camera` are **mutually exclusive**. Providing both raises a validation error (they are not mixed). Providing neither also raises. `output_path` is always required. `fps` and `loop` apply to the output GIF in both modes.
+`images` and `camera` are **mutually exclusive**. Providing both raises a validation error (they are not mixed). Providing neither also raises. `fps` and `loop` apply to the output GIF in both modes.
+
+The action returns `output_path` (the file that was written). When that file is under Home Assistant's `www` folder, it also returns `url` (for example `/local/gif/front_door_20260813_153045.gif`) so automations can use `response_variable` without hardcoding a path. Existing YAML that already passes `output_path` is unchanged: the given path wins.
 
 Frames of different sizes are resized to match the first image. Palette and RGBA sources are converted to RGB (transparency is flattened onto white) before save. Invalid input or I/O errors raise a Home Assistant error so the action fails visibly in automations.
 
@@ -72,13 +74,15 @@ data:
   loop: true
 ```
 
+Omit `output_path` to write `/config/www/gif/images_<YYYYMMDD_HHMMSS>.gif` instead.
+
 `service: gif.create_gif` still works.
 
-You can also call this from **Developer Tools → Actions**. The form uses selectors for the image list, camera entity, count, interval, FPS, output path, and loop toggle.
+You can also call this from **Developer Tools → Actions**. The form uses selectors for the image list, camera entity, count, interval, FPS, optional output path, and loop toggle. In camera mode you can pick a camera (and count/interval if you want) without typing a filesystem path.
 
 ## Camera → GIF
 
-Pass a camera entity and how many frames to grab. This is the usual doorbell / motion pattern:
+Pass a camera entity. Count and interval are optional; you do not need a path:
 
 ```yaml
 automation:
@@ -93,16 +97,15 @@ automation:
           camera: camera.front_door
           count: 10
           interval: 0.5
-          fps: 10
-          output_path: /config/www/gif/front_door.gif
-          loop: true
+        response_variable: gif_result
+      - action: notify.persistent_notification
+        data:
+          message: "GIF saved to {{ gif_result.output_path }} ({{ gif_result.url }})"
 ```
 
-That captures 10 stills 0.5 s apart (~4.5 s of video), then stitches them. Motion works the same way with `binary_sensor.front_door_motion`.
+That captures 10 stills 0.5 s apart (~4.5 s of video), then stitches them into `/config/www/gif/front_door_<YYYYMMDD_HHMMSS>.gif` (object_id is sanitized for the filename). The file is served as `/local/gif/...`. Motion works the same way with `binary_sensor.front_door_motion`.
 
-File-path usage is unchanged if you already snapshot yourself and pass `images`.
-
-Home Assistant can write under `/config/www` by default. The GIF is then available at `/local/gif/front_door.gif`.
+If you pass `output_path`, that path is used instead of the default. File-path usage is unchanged if you already snapshot yourself and pass `images`.
 
 ## Requirements
 
