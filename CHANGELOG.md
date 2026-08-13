@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Add optional camera mode to `gif.create_gif`: pass `camera` (a `camera.*` entity), `count` (default 10, range 2–60), and `interval` (default 0.5 s, range 0.1–10 s).
+- `images` and `camera` are mutually exclusive. Existing `images` + `fps` + `output_path` + `loop` usage is unchanged.
+- Capture stills with `camera.async_get_image`, write temp JPEGs, reuse GIF assembly, and delete temps afterwards.
+- Snapshot waits use `asyncio.sleep`; Pillow and disk I/O stay in an executor.
+- Validate that the entity exists, is a camera, and is available. Cap count/interval so an automation cannot run forever.
+
 ## 0.2.0
 
 - Surface validation and I/O failures as Home Assistant errors so the UI and automations can see them.
