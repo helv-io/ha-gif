@@ -4,7 +4,7 @@
 [![Validate](https://github.com/helv-io/ha-gif/actions/workflows/validate.yml/badge.svg)](https://github.com/helv-io/ha-gif/actions/workflows/validate.yml)
 [![Tests](https://github.com/helv-io/ha-gif/actions/workflows/test.yml/badge.svg)](https://github.com/helv-io/ha-gif/actions/workflows/test.yml)
 
-A Home Assistant custom integration that creates animated GIFs from image files via `gif.create_gif`.
+A Home Assistant custom integration that creates animated GIFs from image files or a camera entity via `gif.create_gif`.
 
 ## Installation
 
@@ -41,18 +41,25 @@ The `gif.create_gif` action is registered at startup so automations can be valid
 
 ## Action: `gif.create_gif`
 
-Create an animated GIF from existing image files (JPEG, PNG, and anything else Pillow can open).
+Create an animated GIF from **either** existing image files **or** snapshots of a camera entity. Pass one source, not both.
 
 | Field | Required | Default | Description |
 | --- | --- | --- | --- |
-| `images` | yes | — | List of image file paths. At least **two** images are required. |
-| `fps` | no | `10` | Frames per second (`1`–`60`). |
+| `images` | if no `camera` | — | List of image file paths (JPEG, PNG, and anything else Pillow can open). At least **two** images are required. Mutually exclusive with `camera`. |
+| `camera` | if no `images` | — | A `camera.*` entity_id. Snapshots are taken with Home Assistant's `camera.async_get_image` API. Mutually exclusive with `images`. |
+| `count` | no | `10` | Number of snapshots in camera mode (`2`–`60`). Ignored when using `images`. |
+| `interval` | no | `0.5` | Seconds between snapshots in camera mode (`0.1`–`10`). Ignored when using `images`. Capture length is `(count − 1) × interval`. |
+| `fps` | no | `10` | Frames per second of the output GIF (`1`–`60`). |
 | `output_path` | yes | — | Path to save the GIF. Parent directories are created if needed. |
 | `loop` | no | `true` | Whether the GIF should loop. |
 
+`images` and `camera` are **mutually exclusive**. Providing both raises a validation error (they are not mixed). Providing neither also raises. `output_path` is always required. `fps` and `loop` apply to the output GIF in both modes.
+
 Frames of different sizes are resized to match the first image. Palette and RGBA sources are converted to RGB (transparency is flattened onto white) before save. Invalid input or I/O errors raise a Home Assistant error so the action fails visibly in automations.
 
-### YAML example
+The camera entity must exist, be in the `camera` domain, and be available (not `unavailable` / `unknown`). Snapshot files are written to a temp directory and deleted after the GIF is saved.
+
+### YAML example (image files)
 
 ```yaml
 action: gif.create_gif
@@ -67,47 +74,33 @@ data:
 
 `service: gif.create_gif` still works.
 
-You can also call this from **Developer Tools → Actions**. The form uses selectors for the image list, FPS, output path, and loop toggle.
+You can also call this from **Developer Tools → Actions**. The form uses selectors for the image list, camera entity, count, interval, FPS, output path, and loop toggle.
 
-## Camera snapshots → GIF
+## Camera → GIF
 
-Save a few camera snapshots, then stitch them:
+Pass a camera entity and how many frames to grab. This is the usual doorbell / motion pattern:
 
 ```yaml
 automation:
   - alias: Front door GIF
     triggers:
       - trigger: state
-        entity_id: binary_sensor.front_door_motion
+        entity_id: binary_sensor.front_doorbell
         to: "on"
     actions:
-      - action: camera.snapshot
-        target:
-          entity_id: camera.front_door
-        data:
-          filename: /config/www/gif/front_door_1.jpg
-      - delay: "00:00:01"
-      - action: camera.snapshot
-        target:
-          entity_id: camera.front_door
-        data:
-          filename: /config/www/gif/front_door_2.jpg
-      - delay: "00:00:01"
-      - action: camera.snapshot
-        target:
-          entity_id: camera.front_door
-        data:
-          filename: /config/www/gif/front_door_3.jpg
       - action: gif.create_gif
         data:
-          images:
-            - /config/www/gif/front_door_1.jpg
-            - /config/www/gif/front_door_2.jpg
-            - /config/www/gif/front_door_3.jpg
-          fps: 4
+          camera: camera.front_door
+          count: 10
+          interval: 0.5
+          fps: 10
           output_path: /config/www/gif/front_door.gif
           loop: true
 ```
+
+That captures 10 stills 0.5 s apart (~4.5 s of video), then stitches them. Motion works the same way with `binary_sensor.front_door_motion`.
+
+File-path usage is unchanged if you already snapshot yourself and pass `images`.
 
 Home Assistant can write under `/config/www` by default. The GIF is then available at `/local/gif/front_door.gif`.
 
