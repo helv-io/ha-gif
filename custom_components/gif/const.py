@@ -10,6 +10,7 @@ ATTR_COUNT = "count"
 ATTR_INTERVAL = "interval"
 ATTR_FPS = "fps"
 ATTR_OUTPUT_PATH = "output_path"
+ATTR_URL = "url"
 ATTR_LOOP = "loop"
 
 CAMERA_DOMAIN = "camera"
@@ -18,6 +19,9 @@ DEFAULT_FPS = 10
 DEFAULT_LOOP = True
 DEFAULT_COUNT = 10
 DEFAULT_INTERVAL = 0.5
+DEFAULT_IMAGES_PREFIX = "images"
+WWW_DIRNAME = "www"
+WWW_GIF_DIRNAME = "gif"
 MIN_FPS = 1
 MAX_FPS = 60
 MIN_IMAGES = 2

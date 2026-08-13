@@ -107,11 +107,11 @@ def create_gif_sync(
 
         duration = max(1, round(1000 / fps))
         loop_value = 0 if loop else 1
-        parent = os.path.dirname(output_path)
-        if parent:
-            os.makedirs(parent, exist_ok=True)
 
         try:
+            parent = os.path.dirname(output_path)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
             frames[0].save(
                 output_path,
                 format="GIF",
