@@ -28,13 +28,13 @@ def test_camera_path_uses_async_get_image_and_asyncio_sleep() -> None:
 def test_helpers_do_not_import_homeassistant() -> None:
     """GIF assembly and snapshot helpers must stay testable without HA core."""
     root = Path(__file__).resolve().parents[1] / "custom_components" / "gif"
-    for name in ("gif.py", "snapshot.py", "const.py"):
+    for name in ("gif.py", "snapshot.py", "const.py", "output.py"):
         source = (root / name).read_text(encoding="utf-8")
         assert "homeassistant" not in source
 
 
-def test_schema_keeps_images_optional_and_output_required() -> None:
-    """Existing images usage stays valid; output_path stays required."""
+def test_schema_keeps_images_and_output_optional() -> None:
+    """Existing images usage stays valid; output_path is optional with a default."""
     tree = ast.parse(INIT.read_text(encoding="utf-8"))
     schema_assign = None
     for node in tree.body:
@@ -53,7 +53,20 @@ def test_schema_keeps_images_optional_and_output_required() -> None:
     assert "ATTR_CAMERA" in dumped
     assert "ATTR_COUNT" in dumped
     assert "ATTR_INTERVAL" in dumped
-    assert "vol.Required(ATTR_OUTPUT_PATH)" in dumped
+    assert "vol.Optional(ATTR_OUTPUT_PATH)" in dumped
+    assert "vol.Required(ATTR_OUTPUT_PATH)" not in dumped
     assert "vol.Required(ATTR_IMAGES)" not in dumped
     assert "entity_domain" in dumped
     assert "camera" in dumped
+
+
+def test_service_returns_optional_response_with_default_path() -> None:
+    """Action returns output_path (and url when under www); path defaults via hass.config.path."""
+    source = INIT.read_text(encoding="utf-8")
+    assert "SupportsResponse.OPTIONAL" in source
+    assert "build_service_response" in source
+    assert "resolve_output_path" in source
+    assert "hass.config.path" in source
+    assert "dt_util.now" in source
+    assert "return build_service_response" in source
+
