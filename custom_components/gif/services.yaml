@@ -1,26 +1,39 @@
 create_gif:
   name: Create GIF
-  description: Create a GIF from a list of images
+  description: Create an animated GIF from a list of image files
   fields:
     images:
       name: Images
-      description: List of image file paths
+      description: List of image file paths (at least two)
       required: true
-      example: ["/config/images/image1.jpg", "/config/images/image2.jpg"]
+      example: ["/config/www/gif/frame1.jpg", "/config/www/gif/frame2.jpg"]
+      selector:
+        text:
+          multiple: true
     fps:
       name: FPS
-      description: Frames per second for the GIF
+      description: Frames per second
       required: false
       default: 10
       example: 10
+      selector:
+        number:
+          min: 1
+          max: 60
+          step: 1
+          mode: box
     output_path:
       name: Output Path
       description: Path to save the GIF
       required: true
-      example: "/config/gifs/output.gif"
+      example: "/config/www/gif/output.gif"
+      selector:
+        text:
     loop:
       name: Loop
       description: Whether the GIF should loop
       required: false
       default: true
       example: true
+      selector:
+        boolean:

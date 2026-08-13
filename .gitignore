@@ -10,6 +10,11 @@ __pycache__/
 env/
 venv/
 
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
 # Misc
 .DS_Store
 *.log

@@ -2,23 +2,41 @@
   "config": {
     "step": {
       "user": {
-        "description": "No configuration is needed for this component. Click submit to add the integration.",
-        "title": "GIF Creator Setup"
+        "title": "GIF",
+        "description": "No configuration is needed. Submit to add the integration. The gif.create_gif action will then be available."
       }
-    },
-    "error": {
-      "single_instance_allowed": "Only a single instance is allowed."
     },
     "abort": {
       "single_instance_allowed": "Only a single instance is allowed."
     }
   },
-  "options": {
-    "step": {
-      "init": {
-        "description": "No options available for this integration.",
-        "title": "GIF Creator Options"
+  "services": {
+    "create_gif": {
+      "name": "Create GIF",
+      "description": "Create an animated GIF from a list of image files.",
+      "fields": {
+        "images": {
+          "name": "Images",
+          "description": "List of image file paths. At least two images are required. Mixed sizes are resized to the first frame."
+        },
+        "fps": {
+          "name": "FPS",
+          "description": "Frames per second (1–60). Defaults to 10."
+        },
+        "output_path": {
+          "name": "Output path",
+          "description": "Path where the GIF should be saved."
+        },
+        "loop": {
+          "name": "Loop",
+          "description": "Whether the GIF should loop. Defaults to on."
+        }
       }
+    }
+  },
+  "exceptions": {
+    "not_setup": {
+      "message": "The GIF integration is not set up. Add it under Settings → Devices & services."
     }
   }
 }
