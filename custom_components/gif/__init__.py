@@ -9,10 +9,16 @@ from typing import NoReturn
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.core import (
+    HomeAssistant,
+    ServiceCall,
+    ServiceResponse,
+    SupportsResponse,
+)
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.util import dt as dt_util
 
 from .const import (
     ATTR_CAMERA,
@@ -37,6 +43,7 @@ from .const import (
     SERVICE_CREATE_GIF,
 )
 from .gif import GifCreationError, GifValidationError, create_gif_sync
+from .output import build_service_response, resolve_output_path
 from .snapshot import (
     SOURCE_CAMERA,
     async_collect_snapshots,
@@ -65,7 +72,7 @@ CREATE_GIF_SCHEMA = vol.Schema(
         vol.Optional(ATTR_FPS, default=DEFAULT_FPS): vol.All(
             vol.Coerce(int), vol.Range(min=MIN_FPS, max=MAX_FPS)
         ),
-        vol.Required(ATTR_OUTPUT_PATH): cv.string,
+        vol.Optional(ATTR_OUTPUT_PATH): cv.string,
         vol.Optional(ATTR_LOOP, default=DEFAULT_LOOP): cv.boolean,
     }
 )
@@ -84,7 +91,7 @@ def _raise_validation_error(err: GifValidationError) -> NoReturn:
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register gif.create_gif so automations can validate it at startup."""
 
-    async def async_create_gif(call: ServiceCall) -> None:
+    async def async_create_gif(call: ServiceCall) -> ServiceResponse:
         """Create a GIF from image files or camera snapshots."""
         if not _async_entry_is_loaded(hass):
             raise ServiceValidationError(
@@ -96,7 +103,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         images: list[str] | None = call.data.get(ATTR_IMAGES)
         camera_id: str | None = call.data.get(ATTR_CAMERA)
         fps: int = call.data.get(ATTR_FPS, DEFAULT_FPS)
-        output_path: str = call.data[ATTR_OUTPUT_PATH]
+        requested_path: str | None = call.data.get(ATTR_OUTPUT_PATH)
         loop: bool = call.data.get(ATTR_LOOP, DEFAULT_LOOP)
         count: int = call.data.get(ATTR_COUNT, DEFAULT_COUNT)
         interval: float = call.data.get(ATTR_INTERVAL, DEFAULT_INTERVAL)
@@ -109,6 +116,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 validate_camera_entity(camera_id, hass.states.get(camera_id))
         except GifValidationError as err:
             _raise_validation_error(err)
+
+        output_path = resolve_output_path(
+            requested_path,
+            camera_entity_id=camera_id if mode == SOURCE_CAMERA else None,
+            config_path=hass.config.path,
+            when=dt_util.now(),
+        )
 
         try:
             if mode == SOURCE_CAMERA:
@@ -128,12 +142,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             raise HomeAssistantError(str(err)) from err
 
         _LOGGER.info("GIF created at %s", output_path)
+        return build_service_response(output_path, hass.config.path)
 
     hass.services.async_register(
         DOMAIN,
         SERVICE_CREATE_GIF,
         async_create_gif,
         schema=CREATE_GIF_SCHEMA,
+        supports_response=SupportsResponse.OPTIONAL,
     )
     return True
 
