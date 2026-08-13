@@ -7,11 +7,11 @@
   "config_flow": true,
   "documentation": "https://github.com/helv-io/ha-gif",
   "integration_type": "service",
-  "iot_class": "assumed_state",
+  "iot_class": "calculated",
   "issue_tracker": "https://github.com/helv-io/ha-gif/issues",
   "requirements": [
     "Pillow>=9.1.0,<13.0.0"
   ],
   "single_config_entry": true,
-  "version": "0.1.2"
+  "version": "0.2.0"
 }

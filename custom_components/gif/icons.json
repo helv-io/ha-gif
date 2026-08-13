@@ -1,0 +1,7 @@
+{
+  "services": {
+    "create_gif": {
+      "service": "mdi:file-gif-box"
+    }
+  }
+}

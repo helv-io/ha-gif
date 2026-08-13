@@ -1,63 +1,104 @@
-import asyncio
+"""The GIF integration."""
+
+from __future__ import annotations
+
 import logging
-from PIL import Image
 
-from homeassistant import config_entries
-import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
 
-from .const import DOMAIN
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
+from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.typing import ConfigType
 
-CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+from .const import (
+    ATTR_FPS,
+    ATTR_IMAGES,
+    ATTR_LOOP,
+    ATTR_OUTPUT_PATH,
+    DEFAULT_FPS,
+    DEFAULT_LOOP,
+    DOMAIN,
+    MAX_FPS,
+    MIN_FPS,
+    MIN_IMAGES,
+    SERVICE_CREATE_GIF,
+)
+from .gif import GifCreationError, GifValidationError, create_gif_sync
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup(hass, config):
-    async def create_gif_service(call):
-        images = call.data.get('images', [])
-        fps = call.data.get('fps', 10)
-        output_path = call.data.get('output_path')
-        loop = call.data.get('loop', True)
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-        if not images or len(images) < 2:
-            _LOGGER.error("At least 2 images required")
-            return
+CREATE_GIF_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_IMAGES): vol.All(
+            cv.ensure_list, [cv.string], vol.Length(min=MIN_IMAGES)
+        ),
+        vol.Optional(ATTR_FPS, default=DEFAULT_FPS): vol.All(
+            vol.Coerce(int), vol.Range(min=MIN_FPS, max=MAX_FPS)
+        ),
+        vol.Required(ATTR_OUTPUT_PATH): cv.string,
+        vol.Optional(ATTR_LOOP, default=DEFAULT_LOOP): cv.boolean,
+    }
+)
 
-        if not output_path:
-            _LOGGER.error("Output path required")
-            return
 
-        # Create GIF in thread to avoid blocking
-        event_loop = asyncio.get_event_loop()
-        await event_loop.run_in_executor(None, create_gif_sync, images, fps, output_path, loop)
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Register gif.create_gif so automations can validate it at startup."""
 
-        _LOGGER.info(f"GIF created at {output_path}")
+    async def async_create_gif(call: ServiceCall) -> None:
+        """Create a GIF from a list of image files."""
+        if not _async_entry_is_loaded(hass):
+            raise ServiceValidationError(
+                "The GIF integration is not set up",
+                translation_domain=DOMAIN,
+                translation_key="not_setup",
+            )
 
-    hass.services.async_register('gif', 'create_gif', create_gif_service)
+        images: list[str] = call.data[ATTR_IMAGES]
+        fps: int = call.data.get(ATTR_FPS, DEFAULT_FPS)
+        output_path: str = call.data[ATTR_OUTPUT_PATH]
+        loop: bool = call.data.get(ATTR_LOOP, DEFAULT_LOOP)
 
-    return True
-
-async def async_setup_entry(hass, entry):
-    """Set up GIF Creator from a config entry."""
-    # Since this integration only provides a service, no additional setup needed
-    return True
-
-def create_gif_sync(images, fps, output_path, loop):
-    frames = []
-    first_size = None
-    for img_path in images:
         try:
-            img = Image.open(img_path)
-            if first_size is None:
-                first_size = img.size
-                frames.append(img)
-            else:
-                # Resize to match first image dimensions
-                resized_img = img.resize(first_size, Image.Resampling.LANCZOS)
-                frames.append(resized_img)
-        except Exception as e:
-            _LOGGER.error(f"Failed to open image {img_path}: {e}")
-            return
+            await hass.async_add_executor_job(
+                create_gif_sync, images, fps, output_path, loop
+            )
+        except GifValidationError as err:
+            raise ServiceValidationError(str(err)) from err
+        except GifCreationError as err:
+            raise HomeAssistantError(str(err)) from err
 
-    if frames:
-        loop_value = 0 if loop else 1
-        frames[0].save(output_path, save_all=True, append_images=frames[1:], duration=1000//fps, loop=loop_value)
+        _LOGGER.info("GIF created at %s", output_path)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_CREATE_GIF,
+        async_create_gif,
+        schema=CREATE_GIF_SCHEMA,
+    )
+    return True
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up GIF from a config entry."""
+    return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry.
+
+    The service stays registered (HA action-setup) so automations can still
+    be validated. Calls raise if no loaded entry remains.
+    """
+    return True
+
+
+def _async_entry_is_loaded(hass: HomeAssistant) -> bool:
+    """Return True if a GIF config entry is currently loaded."""
+    return any(
+        entry.state is ConfigEntryState.LOADED
+        for entry in hass.config_entries.async_entries(DOMAIN)
+    )
