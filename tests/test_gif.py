@@ -43,6 +43,8 @@ def test_domain_and_service_contract() -> None:
     assert MIN_IMAGES == 2
     assert MIN_FPS == 1
     assert MAX_FPS == 60
+    assert const.ATTR_IMAGES == "images"
+    assert const.ATTR_OUTPUT_PATH == "output_path"
 
 
 def test_create_gif_writes_animated_file(tmp_path: Path) -> None:

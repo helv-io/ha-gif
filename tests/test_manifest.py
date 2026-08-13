@@ -19,7 +19,7 @@ def test_manifest_public_contract() -> None:
     assert manifest["config_flow"] is True
     assert manifest["single_config_entry"] is True
     assert manifest["codeowners"] == ["@Helvio88"]
-    assert manifest["version"] == "0.2.0"
+    assert manifest["version"] == "0.3.0"
 
 
 def test_hacs_json_keeps_custom_repo_install() -> None:
@@ -35,13 +35,23 @@ def test_services_yaml_has_selectors_and_original_fields() -> None:
     """Keep gif.create_gif fields and add UI selectors."""
     text = (INTEGRATION / "services.yaml").read_text(encoding="utf-8")
     assert text.strip().startswith("create_gif:")
-    for field in ("images:", "fps:", "output_path:", "loop:"):
+    for field in (
+        "images:",
+        "camera:",
+        "count:",
+        "interval:",
+        "fps:",
+        "output_path:",
+        "loop:",
+    ):
         assert field in text
     assert "selector:" in text
     assert "multiple: true" in text
     assert "boolean:" in text
+    assert "domain: camera" in text
     assert "min: 1" in text
     assert "max: 60" in text
+    assert "unit_of_measurement: seconds" in text
 
 
 def test_translations_cover_config_services_and_exceptions() -> None:
@@ -52,5 +62,18 @@ def test_translations_cover_config_services_and_exceptions() -> None:
     assert "options" not in translations
     assert "single_instance_allowed" in translations["config"]["abort"]
     fields = translations["services"]["create_gif"]["fields"]
-    assert set(fields) == {"images", "fps", "output_path", "loop"}
-    assert "not_setup" in translations["exceptions"]
+    assert set(fields) == {
+        "images",
+        "camera",
+        "count",
+        "interval",
+        "fps",
+        "output_path",
+        "loop",
+    }
+    exceptions = translations["exceptions"]
+    assert "not_setup" in exceptions
+    assert "source_exclusive" in exceptions
+    assert "source_required" in exceptions
+    assert "camera_not_found" in exceptions
+    assert "camera_unavailable" in exceptions

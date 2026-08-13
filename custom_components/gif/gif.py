@@ -20,6 +20,20 @@ class GifError(Exception):
 class GifValidationError(GifError):
     """Raised when service input is invalid."""
 
+    translation_key: str | None
+    translation_placeholders: dict[str, str] | None
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        translation_key: str | None = None,
+        translation_placeholders: dict[str, str] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.translation_key = translation_key
+        self.translation_placeholders = translation_placeholders
+
 
 class GifCreationError(GifError):
     """Raised when reading or writing image files fails."""
