@@ -13,15 +13,27 @@
   "services": {
     "create_gif": {
       "name": "Create GIF",
-      "description": "Create an animated GIF from a list of image files.",
+      "description": "Create an animated GIF from image files or from a camera entity.",
       "fields": {
         "images": {
           "name": "Images",
-          "description": "List of image file paths. At least two images are required. Mixed sizes are resized to the first frame."
+          "description": "List of image file paths. At least two images are required. Mutually exclusive with camera. Mixed sizes are resized to the first frame."
+        },
+        "camera": {
+          "name": "Camera",
+          "description": "Camera entity to snapshot. Mutually exclusive with images. Use with count and interval."
+        },
+        "count": {
+          "name": "Count",
+          "description": "Number of snapshots to capture in camera mode (2–60). Defaults to 10. Ignored when using images."
+        },
+        "interval": {
+          "name": "Interval",
+          "description": "Seconds between snapshots in camera mode (0.1–10). Defaults to 0.5. Ignored when using images."
         },
         "fps": {
           "name": "FPS",
-          "description": "Frames per second (1–60). Defaults to 10."
+          "description": "Frames per second of the output GIF (1–60). Defaults to 10."
         },
         "output_path": {
           "name": "Output path",
@@ -37,6 +49,42 @@
   "exceptions": {
     "not_setup": {
       "message": "The GIF integration is not set up. Add it under Settings → Devices & services."
+    },
+    "source_exclusive": {
+      "message": "images and camera are mutually exclusive; provide one or the other."
+    },
+    "source_required": {
+      "message": "Provide either images (at least 2 file paths) or a camera entity."
+    },
+    "min_images": {
+      "message": "At least 2 images are required."
+    },
+    "count_invalid": {
+      "message": "Count must be an integer."
+    },
+    "count_range": {
+      "message": "Count must be between 2 and 60."
+    },
+    "interval_invalid": {
+      "message": "Interval must be a number of seconds."
+    },
+    "interval_range": {
+      "message": "Interval must be between 0.1 and 10 seconds."
+    },
+    "camera_not_camera": {
+      "message": "{entity_id} is not a camera entity."
+    },
+    "camera_not_found": {
+      "message": "Unknown camera entity {entity_id}."
+    },
+    "camera_unavailable": {
+      "message": "Camera {entity_id} is not available."
+    },
+    "snapshot_failed": {
+      "message": "Failed to snapshot {entity_id}: {error}"
+    },
+    "empty_snapshot": {
+      "message": "Camera {entity_id} returned an empty snapshot."
     }
   }
 }
