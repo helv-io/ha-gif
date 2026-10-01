@@ -19,7 +19,7 @@ def test_manifest_public_contract() -> None:
     assert manifest["config_flow"] is True
     assert manifest["single_config_entry"] is True
     assert manifest["codeowners"] == ["@Helvio88"]
-    assert manifest["version"] == "0.3.1"
+    assert manifest["version"] == "0.3.2"
 
 
 def test_hacs_json_keeps_custom_repo_install() -> None:
