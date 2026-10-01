@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+
+- Drop `Pillow` from manifest `requirements`. Home Assistant core already ships Pillow, and Hassfest rejects core dependencies in a custom integration manifest. Pillow stays pinned in `requirements_test.txt` for the test suite.
+
 ## 0.3.1
 
 - Make `output_path` optional on `gif.create_gif`. Camera mode defaults to `/config/www/gif/<camera_object_id>_<YYYYMMDD_HHMMSS>.gif`; images mode defaults to `/config/www/gif/images_<YYYYMMDD_HHMMSS>.gif`.
