@@ -45,8 +45,8 @@ Create an animated GIF from **either** existing image files **or** snapshots of 
 
 | Field | Required | Default | Description |
 | --- | --- | --- | --- |
-| `images` | if no `camera` | — | List of image file paths (JPEG, PNG, and anything else Pillow can open). At least **two** images are required. Mutually exclusive with `camera`. |
-| `camera` | if no `images` | — | A `camera.*` entity_id. Snapshots are taken with Home Assistant's `camera.async_get_image` API. Mutually exclusive with `images`. |
+| `images` | if no `camera` | None | List of image file paths (JPEG, PNG, and anything else Pillow can open). At least **two** images are required. Mutually exclusive with `camera`. |
+| `camera` | if no `images` | None | A `camera.*` entity_id. Snapshots are taken with Home Assistant's `camera.async_get_image` API. Mutually exclusive with `images`. |
 | `count` | no | `10` | Number of snapshots in camera mode (`2`–`60`). Ignored when using `images`. |
 | `interval` | no | `0.5` | Seconds between snapshots in camera mode (`0.1`–`10`). Ignored when using `images`. Capture length is `(count − 1) × interval`. |
 | `fps` | no | `10` | Frames per second of the output GIF (`1`–`60`). |
