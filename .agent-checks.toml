@@ -1,0 +1,14 @@
+# Settings for the shared checks (the pinned copy is in .agent-checks/).
+[docs]
+user-facing = "^custom_components/"
+require = ["README.md", "CHANGELOG.md"]
+
+[model-ids]
+exempt = []
+
+[private]
+patterns = ['helv\.io']
+
+[[release.version]]
+file = "custom_components/gif/manifest.json"
+pattern = '"version": "([^"]+)"'
