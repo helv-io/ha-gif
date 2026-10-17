@@ -18,7 +18,7 @@ Guidelines for changes to GIF for Home Assistant. Applies to code, docs and rele
 
 ## Rules and what enforces them
 
-A rule that nothing enforces is a wish. Before you push, run `.agent-checks/bin/agent-checks local` (the shared `agent-checks` repo on Helvio's own git server) and `pytest -q -rs`.
+A rule that nothing enforces is a wish. Before you push, run `.agent-checks/bin/agent-checks local` (the shared [`agent-checks`](https://github.com/helv-io/agent-checks) repo) and `pytest -q -rs`.
 
 | Rule | Enforced by |
 |---|---|
