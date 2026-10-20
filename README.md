@@ -112,6 +112,8 @@ If you pass `output_path`, that path is used instead of the default. File-path u
 - Home Assistant 2024.6.0 or later
 - Pillow (installed automatically from `manifest.json`)
 
+Home Assistant 2026.3 and newer uses the brand icons in `custom_components/gif/brand/`.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.3
+
+- Ship local brand assets (icons under `custom_components/gif/brand/`) for Home Assistant 2026.3 and newer.
+
 ## 0.3.2
 
 - Drop `Pillow` from manifest `requirements`. Home Assistant core already ships Pillow, and Hassfest rejects core dependencies in a custom integration manifest. Pillow stays pinned in `requirements_test.txt` for the test suite.
